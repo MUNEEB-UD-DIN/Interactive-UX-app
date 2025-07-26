@@ -7,65 +7,73 @@
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
+<header class="site-header">
+  <div class="brand">
+    <span class="logo">🧭</span>
+    <span class="brand-name">Geo Age Validator</span>
+    <!-- Theme Toggle -->
+  <button id="theme-toggle">🌗 Toggle Theme</button>
+  </div>
+</header>
+  
 <body>
-  <!-- Theme Toggle -->
-<button id="theme-toggle">🌗 Toggle Theme</button>
 
-<!-- Age Modal -->
-<div id="age-modal" class="modal">
-  <div class="modal-content">
-    <h2>Enter Your Age</h2>
-    <input type="number" id="age-input" placeholder="Enter age" />
-    <button id="submit-age">Submit</button>
+
+  <!-- Age Modal -->
+  <div id="age-modal" class="modal">
+    <div class="modal-content">
+      <h2>Enter Your Age</h2>
+      <input type="number" id="age-input" placeholder="Enter age" />
+      <button id="submit-age">Submit</button>
+    </div>
   </div>
-</div>
 
-<!-- IP Info -->
-<section>
-  <div class="info-box">
-    <h2 id="user-country" class="loading">Detecting your IP and country...</h2>
-    <img id="ip-flag" src="" alt="Flag">
+  <!-- IP Info -->
+  <section>
+    <div class="info-box">
+      <h2 id="user-country" class="loading">Detecting your IP and country...</h2>
+      <img id="ip-flag" src="" alt="Flag">
+    </div>
+  </section>
+
+  <!-- DOB Selection -->
+  <section>
+    <h2>Date of Birth</h2>
+    <input type="date" id="dob" />
+    <div id="dob-result" class="info-box"></div>
+  </section>
+
+  <!-- Country Selection -->
+  <section>
+    <h2>Select a Country</h2>
+    <select id="country-select">
+      <option value="">-- Select Country --</option>
+    </select>
+    <div id="selected-country-flag"></div>
+    <div id="country-fact" class="info-box"></div>
+  </section>
+
+  <!-- Custom Alert Modal -->
+  <div id="custom-alert" class="custom-modal">
+    <div class="custom-modal-content">
+      <span class="close-btn" onclick="closeCustomAlert()">&times;</span>
+      <p id="custom-alert-message"></p>
+    </div>
   </div>
-</section>
 
-<!-- DOB Selection -->
-<section>
-  <h2>Date of Birth</h2>
-  <input type="date" id="dob" />
-  <div id="dob-result" class="info-box"></div>
-</section>
-
-<!-- Country Selection -->
-<section>
-  <h2>Select a Country</h2>
-  <select id="country-select">
-    <option value="">-- Select Country --</option>
-  </select>
-  <div id="selected-country-flag"></div>
-  <div id="country-fact" class="info-box"></div>
-</section>
-
-<!-- Custom Alert Modal -->
-<div id="custom-alert" class="custom-modal">
-  <div class="custom-modal-content">
-    <span class="close-btn" onclick="closeCustomAlert()">&times;</span>
-    <p id="custom-alert-message"></p>
-  </div>
-</div>
-
-<!-- Reset Button -->
-<button id="reset-btn">🔁 Reset App</button>
-
+  <!-- Reset Button -->
+  <button id="reset-btn">🔁 Reset App</button>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       checkTheme();
-      loadStoredData();
       getIPInfo();
       loadAllCountries();
 
       if (!localStorage.getItem('age')) {
         showAgeModal();
+      } else {
+        document.getElementById('age-modal').classList.remove('show');
       }
 
       document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
@@ -73,7 +81,6 @@
       document.getElementById('country-select').addEventListener('change', handleCountryChange);
       document.getElementById('reset-btn').addEventListener('click', resetApp);
 
-      // Reveal sections one by one
       document.querySelectorAll("section").forEach((sec, i) => {
         setTimeout(() => sec.classList.add("visible"), i * 300 + 300);
       });
@@ -111,49 +118,43 @@
     }
 
     function showAgeModal() {
-  const modal = document.getElementById('age-modal');
-  modal.classList.add('show');
+      const modal = document.getElementById('age-modal');
+      modal.classList.add('show');
 
-  document.getElementById('submit-age').addEventListener('click', () => {
-    const age = parseInt(document.getElementById('age-input').value);
-
-    if (isNaN(age) || age <= 0) {
-      showCustomAlert("Please enter a valid age.");
-      return;
+      document.getElementById('submit-age').addEventListener('click', () => {
+        const age = parseInt(document.getElementById('age-input').value);
+        if (isNaN(age) || age <= 0) {
+          showCustomAlert("Please enter a valid age.");
+          return;
+        }
+        if (age < 18) {
+          showCustomAlert("Access denied. You must be at least 18.");
+          setTimeout(() => {
+            window.location.href = "https://www.google.com";
+          }, 100000);
+        } else {
+          localStorage.setItem('age', age);
+          modal.classList.remove('show');
+        }
+      });
     }
-
-    if (age < 18) {
-      showCustomAlert("Access denied. You must be at least 18.");
-      setTimeout(() => {
-        window.location.href = "https://www.google.com";
-      }, 100000);
-    } else {
-      localStorage.setItem('age', age);
-      modal.classList.remove('show');
-    }
-  });
-}
-
 
     function showCustomAlert(message) {
-  const alertModal = document.getElementById('custom-alert');
-  document.getElementById('custom-alert-message').innerText = message;
-  alertModal.style.display = 'flex';
-}
+      const alertModal = document.getElementById('custom-alert');
+      document.getElementById('custom-alert-message').innerText = message;
+      alertModal.style.display = 'flex';
+    }
 
-function closeCustomAlert() {
-  document.getElementById('custom-alert').style.display = 'none';
-}
-
+    function closeCustomAlert() {
+      document.getElementById('custom-alert').style.display = 'none';
+    }
 
     function handleDOBChange() {
       const dob = new Date(this.value);
       const now = new Date();
-
       let y = now.getFullYear() - dob.getFullYear();
       let m = now.getMonth() - dob.getMonth();
       let d = now.getDate() - dob.getDate();
-
       if (d < 0) { m--; d += 30; }
       if (m < 0) { y--; m += 12; }
 
@@ -169,7 +170,6 @@ function closeCustomAlert() {
         .then(data => {
           const select = document.getElementById("country-select");
           data.sort((a, b) => a.name.common.localeCompare(b.name.common));
-
           data.forEach(country => {
             const option = document.createElement("option");
             option.value = country.name.common;
@@ -179,31 +179,29 @@ function closeCustomAlert() {
             option.dataset.population = country.population;
             select.appendChild(option);
           });
-
           window.allCountries = data;
+
+          // ✅ After countries are loaded, restore selected one
+          loadStoredCountry();
         });
     }
 
     function handleCountryChange() {
       const selected = this.value;
       const countryData = window.allCountries.find(c => c.name.common === selected);
-
       if (countryData) {
         const flag = countryData.flags.png;
         const capital = countryData.capital?.[0] || "Unknown";
         const population = countryData.population.toLocaleString();
-
         document.getElementById("selected-country-flag").innerHTML =
           `<img src="${flag}" alt="${selected} Flag">`;
-
         document.getElementById("country-fact").innerText =
           `Capital: ${capital}, Population: ${population}`;
-
         localStorage.setItem("selected_country", selected);
       }
     }
 
-    function loadStoredData() {
+    function loadStoredCountry() {
       const dob = localStorage.getItem('dob');
       const country = localStorage.getItem('selected_country');
 
